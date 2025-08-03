@@ -22,8 +22,8 @@ public class Room
 
         for (int x = minX; x < maxX; x++)
         {
-            hallwaysCandidates.Add(new Hallway(new Vector2Int(x, 0)));
-            hallwaysCandidates.Add(new Hallway(new Vector2Int(x, top)));
+            hallwaysCandidates.Add(new Hallway(HallwayDirection.Bottom, new Vector2Int(x, 0)));
+            hallwaysCandidates.Add(new Hallway(HallwayDirection.Top, new Vector2Int(x, top)));
         }
         
         int right = widht - 1;
@@ -32,8 +32,8 @@ public class Room
 
         for (int y = minY; y < maxY; y++)
         {
-            hallwaysCandidates.Add(new Hallway(new Vector2Int(0, y)));
-            hallwaysCandidates.Add(new Hallway(new Vector2Int(right, y)));
+            hallwaysCandidates.Add(new Hallway(HallwayDirection.Left, new Vector2Int(0, y)));
+            hallwaysCandidates.Add(new Hallway(HallwayDirection.Right, new Vector2Int(right, y)));
         }
         
   

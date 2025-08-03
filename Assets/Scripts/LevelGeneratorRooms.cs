@@ -70,11 +70,11 @@ public class LevelGeneratorRooms : MonoBehaviour
         layoutTexture.Reinitialize(width, lenght);                            //le da el tamaño a la textura
         levelLayoutDisplay.transform.localScale = new Vector3(width, lenght, 1f);   //le da tamaño del mapa
         layoutTexture.FillWithColor(Color.black);                                //lo pinta de negro
-        layoutTexture.DrawRectangle(roomCandidate, Color.cyan);                  //Dibuja un rectangulo cyan
+        layoutTexture.DrawRectangle(roomCandidate, Color.blue);                  //Dibuja un rectangulo cyan
 
         foreach (var hallway in _openDoorways)
         {
-            layoutTexture.SetPixel(hallway.StartPositionAbsolute.x, hallway.StartPositionAbsolute.y, Color.red);
+            layoutTexture.SetPixel(hallway.StartPositionAbsolute.x, hallway.StartPositionAbsolute.y, hallway.StartDirection.GetColor());
         }
         
         layoutTexture.SaveAsset();                                                //guarda el asset??
