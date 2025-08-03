@@ -154,9 +154,9 @@ MonoBehaviour:
   width: 64
   lenght: 64
   roomWidthMin: 3
-  roomWidthMax: 5
+  roomWidthMax: 7
   roomLenghtMin: 3
-  roomLenghtMax: 5
+  roomLenghtMax: 10
   levelLayoutDisplay: {fileID: 1146197140}
 --- !u!4 &323391922
 Transform:

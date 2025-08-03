@@ -15,8 +15,28 @@ public class Room
     public List<Hallway> CalculateAllPosibleDoorways(int widht, int lenght, int minDistanceFromEdge)
     {
         List<Hallway> hallwaysCandidates = new List<Hallway>();
-        hallwaysCandidates.Add(new Hallway(new Vector2Int(0,0)));
-        hallwaysCandidates.Add(new Hallway(new Vector2Int(widht,lenght)));
+        
+        int top = lenght - 1;
+        int minX = minDistanceFromEdge;
+        int maxX = widht - minDistanceFromEdge;
+
+        for (int x = minX; x < maxX; x++)
+        {
+            hallwaysCandidates.Add(new Hallway(new Vector2Int(x, 0)));
+            hallwaysCandidates.Add(new Hallway(new Vector2Int(x, top)));
+        }
+        
+        int right = widht - 1;
+        int minY = minDistanceFromEdge;
+        int maxY = lenght - minDistanceFromEdge;
+
+        for (int y = minY; y < maxY; y++)
+        {
+            hallwaysCandidates.Add(new Hallway(new Vector2Int(0, y)));
+            hallwaysCandidates.Add(new Hallway(new Vector2Int(right, y)));
+        }
+        
+  
         return hallwaysCandidates;
     }
     
