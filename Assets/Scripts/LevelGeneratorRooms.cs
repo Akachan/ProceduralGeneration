@@ -13,6 +13,7 @@ public class LevelGeneratorRooms : MonoBehaviour
     [SerializeField] private int roomLenghtMax = 5;
 
     [SerializeField] private GameObject levelLayoutDisplay;
+    [SerializeField] private List<Hallway> _openDoorways;
     
     private System.Random _random;
     
@@ -20,8 +21,19 @@ public class LevelGeneratorRooms : MonoBehaviour
     public void GenerateLevel()
     {   
         _random = new System.Random();
+        
+        _openDoorways = new List<Hallway>();
+        
         var roomRect = GetStartRoomRect();
         Debug.Log(roomRect);
+        Room room = new Room(roomRect);
+        
+        //Calcula las salidas de una room
+        List<Hallway> hallways = room.CalculateAllPosibleDoorways(  room.Area.width,           
+                                                                    room.Area.height, 
+                                                                    1);
+        hallways.ForEach(hallway => hallway.StartRoom = room);                      //Lambda Expression for Foreach
+        hallways.ForEach(hallway => _openDoorways.Add(hallway));
         DrawLayout(roomRect);
     }
 
@@ -59,6 +71,12 @@ public class LevelGeneratorRooms : MonoBehaviour
         levelLayoutDisplay.transform.localScale = new Vector3(width, lenght, 1f);   //le da tamaño del mapa
         layoutTexture.FillWithColor(Color.black);                                //lo pinta de negro
         layoutTexture.DrawRectangle(roomCandidate, Color.cyan);                  //Dibuja un rectangulo cyan
+
+        foreach (var hallway in _openDoorways)
+        {
+            layoutTexture.SetPixel(hallway.StartPositionAbsolute.x, hallway.StartPositionAbsolute.y, Color.red);
+        }
+        
         layoutTexture.SaveAsset();                                                //guarda el asset??
         
 
