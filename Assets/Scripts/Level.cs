@@ -5,14 +5,14 @@ using UnityEngine;
         private int _width;
         private int _lenght;
 
-        public int Width {get{return _width;}}
-        public int Lenght {get{return _lenght;}}
+        public int Width => _width;
+        public int Lenght => _lenght;
         
         private List<Room> _rooms;
         private List<Hallway> _hallways;
-        
-        public List<Room> Rooms {get{return _rooms;}}
-        public List<Hallway> Hallways {get{return _hallways;}}
+
+        public Room[] Rooms => _rooms.ToArray();
+        public Hallway[] Hallways => _hallways.ToArray();
 
         public Level(int width, int lenght)
         {
@@ -22,7 +22,9 @@ using UnityEngine;
             _hallways = new List<Hallway>();
             
         }
-        
+
+        public void AddRoom(Room newRoom) => _rooms.Add(newRoom);
+        public void AddHallway(Hallway newHallway) => _hallways.Add(newHallway);
         
         
         

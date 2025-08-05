@@ -23,12 +23,29 @@ using UnityEngine;
             set { _endRoom = value; }
         }
 
-        public Vector2Int StartPositionAbsolute { get {return _startPosition +_startRoom.Area.position;} }
-        public Vector2Int EndPositionAbsolute { get {return _endPosition +_endRoom.Area.position;} }
+        public Vector2Int StartPositionAbsolute => _startPosition +_startRoom.Area.position;
+        public Vector2Int EndPositionAbsolute => _endPosition +_endRoom.Area.position;
 
-        public HallwayDirection StartDirection {get {return _startDirection;}}
-        public HallwayDirection EndDirection {get {return _endDirection; } set {_endDirection = value;}}
-        
+        public HallwayDirection StartDirection => _startDirection;
+
+        public HallwayDirection EndDirection
+        {
+            get => _endDirection; 
+            set => _endDirection = value;
+        }
+
+
+        public Vector2Int StartPosition
+        {
+            get => _startPosition;
+            set => _startPosition = value;
+        }
+
+        public Vector2Int EndPosition
+        {
+            get => _endPosition;
+            set => _endPosition = value;
+        }
         public Hallway(HallwayDirection startDirection, Vector2Int startPosition, Room startRoom = null)
         {
             this._startDirection = startDirection;

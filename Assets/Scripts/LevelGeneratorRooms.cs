@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -16,14 +17,14 @@ public class LevelGeneratorRooms : MonoBehaviour
     [SerializeField] private List<Hallway> _openDoorways;
     
     private System.Random _random;
+    private Level _level;
     
     [ContextMenu("Generate Level Layout")]
     public void GenerateLevel()
     {   
         _random = new System.Random();
-        
         _openDoorways = new List<Hallway>();
-        
+        _level = new Level(width, lenght);
         var roomRect = GetStartRoomRect();
         Debug.Log(roomRect);
         Room room = new Room(roomRect);
@@ -34,6 +35,20 @@ public class LevelGeneratorRooms : MonoBehaviour
                                                                     1);
         hallways.ForEach(hallway => hallway.StartRoom = room);                      //Lambda Expression for Foreach
         hallways.ForEach(hallway => _openDoorways.Add(hallway));
+        
+        _level.AddRoom(room);
+        
+        //testing
+        Room testRoom1 = new Room(new RectInt(3, 6, 6, 10));
+        Room testRoom2 = new Room(new RectInt(15, 4, 10, 12));
+        Hallway testHallway = new Hallway(HallwayDirection.Right, new Vector2Int(6,3), testRoom1);
+        testHallway.EndPosition = new Vector2Int(0, 5);
+        testHallway.EndRoom = testRoom2;
+        _level.AddRoom(testRoom1);
+        _level.AddRoom(testRoom2);
+        _level.AddHallway(testHallway);
+        //end Testing
+        
         DrawLayout(roomRect);
     }
 
@@ -70,6 +85,10 @@ public class LevelGeneratorRooms : MonoBehaviour
         layoutTexture.Reinitialize(width, lenght);                            //le da el tamaño a la textura
         levelLayoutDisplay.transform.localScale = new Vector3(width, lenght, 1f);   //le da tamaño del mapa
         layoutTexture.FillWithColor(Color.black);                                //lo pinta de negro
+        
+        Array.ForEach(_level.Rooms, room => layoutTexture.DrawRectangle(room.Area, Color.white));
+        Array.ForEach(_level.Hallways, hallway => layoutTexture.DrawLine(hallway.StartPositionAbsolute, hallway.EndPositionAbsolute, Color.white));
+        
         layoutTexture.DrawRectangle(roomCandidate, Color.blue);                  //Dibuja un rectangulo cyan
 
         foreach (var hallway in _openDoorways)
