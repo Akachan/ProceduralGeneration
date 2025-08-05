@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class LevelGeneratorRooms : MonoBehaviour
 {
@@ -38,18 +39,17 @@ public class LevelGeneratorRooms : MonoBehaviour
         
         _level.AddRoom(room);
         
+        Hallway selectedEntryway = _openDoorways[_random.Next(_openDoorways.Count)];
+        Hallway selectedExit = SelectHallwayCandidate(new RectInt(0, 0, 5, 7), selectedEntryway);
+        Debug.Log(selectedExit.StartPosition);
+        Debug.Log(selectedExit.StartDirection);
+        
+        DrawLayout(selectedEntryway, roomRect);
         //testing
-        Room testRoom1 = new Room(new RectInt(3, 6, 6, 10));
-        Room testRoom2 = new Room(new RectInt(15, 4, 10, 12));
-        Hallway testHallway = new Hallway(HallwayDirection.Right, new Vector2Int(6,3), testRoom1);
-        testHallway.EndPosition = new Vector2Int(0, 5);
-        testHallway.EndRoom = testRoom2;
-        _level.AddRoom(testRoom1);
-        _level.AddRoom(testRoom2);
-        _level.AddHallway(testHallway);
+    
         //end Testing
         
-        DrawLayout(roomRect);
+        //DrawLayout(roomRect);
     }
 
     private RectInt GetStartRoomRect()
@@ -76,7 +76,7 @@ public class LevelGeneratorRooms : MonoBehaviour
         return new RectInt(roomX, roomY, roomWidth, roomLenght);
     }
 
-    private void DrawLayout(RectInt roomCandidate = new RectInt())
+    private void DrawLayout(Hallway selectedEntry = null, RectInt roomCandidate = new RectInt())
     {
         var renderer = levelLayoutDisplay.GetComponent<Renderer>();                 //toma el renderer
 
@@ -91,15 +91,29 @@ public class LevelGeneratorRooms : MonoBehaviour
         
         layoutTexture.DrawRectangle(roomCandidate, Color.blue);                  //Dibuja un rectangulo cyan
 
+     
         foreach (var hallway in _openDoorways)
         {
             layoutTexture.SetPixel(hallway.StartPositionAbsolute.x, hallway.StartPositionAbsolute.y, hallway.StartDirection.GetColor());
         }
+        if (selectedEntry != null)
+        {
+            layoutTexture.SetPixel(selectedEntry.StartPositionAbsolute.x, selectedEntry.StartPositionAbsolute.y, Color.red);
+        }
+
         
         layoutTexture.SaveAsset();                                                //guarda el asset??
         
+        
+    }
 
-
+    private Hallway SelectHallwayCandidate(RectInt roomCandidateRect, Hallway entryway)
+    {
+        Room room = new Room(roomCandidateRect);
+        List<Hallway> candidates = room.CalculateAllPosibleDoorways(room.Area.width, room.Area.height, 1);
+        HallwayDirection requiredDirection = entryway.StartDirection.GetOppositeDirection();  
+        List <Hallway> filteredHallwayCandidates = candidates.Where(hallwayCandidate => hallwayCandidate.StartDirection == requiredDirection).ToList();
+        return filteredHallwayCandidates.Count > 0 ? filteredHallwayCandidates[_random.Next(filteredHallwayCandidates.Count)] : null;
     }
 }
 
