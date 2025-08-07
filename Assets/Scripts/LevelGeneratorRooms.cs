@@ -17,6 +17,7 @@ public class LevelGeneratorRooms : MonoBehaviour
     [SerializeField] private int roomWidthMax = 5;
     [SerializeField] private int roomLenghtMin = 3;
     [SerializeField] private int roomLenghtMax = 5;
+    [SerializeField] private int maxRoomCount = 10;
 
     [Header("Hallway")]
     [SerializeField] private int hallwayLengthMin = 2;
@@ -48,10 +49,9 @@ public class LevelGeneratorRooms : MonoBehaviour
         _level.AddRoom(room);
         
         Hallway selectedEntryway = _openDoorways[_random.Next(_openDoorways.Count)];
-        Room secondRoom = ConstructAdjacentRoom(selectedEntryway);
-        _level.AddRoom(secondRoom);
+
+        AddRoom();
         
-        _level.AddHallway(selectedEntryway);
         DrawLayout(selectedEntryway, roomRect);
         
         
@@ -190,6 +190,48 @@ public class LevelGeneratorRooms : MonoBehaviour
         
         return newRoom;
     }
-    
-}
+
+    private void AddRoom()
+    {
+        while (_openDoorways.Count > 0 && _level.Rooms.Length < maxRoomCount)
+        {
+            //Selecciona  una entrada random de todas las entradas disponibles
+            Hallway selectedEntryway = _openDoorways[_random.Next(0, _openDoorways.Count)];
+
+            //creo una room que salga por esa entrada
+            Room newRoom = ConstructAdjacentRoom(selectedEntryway);
+
+            //si no se puede creear una room en ese hallway, retira esa entrada del pool de objetos para que
+            //no se vuelva a seleccionar
+            if (newRoom == null)
+            {
+                _openDoorways.Remove(selectedEntryway);
+                continue;
+            }
+            
+            //si tuvimos exito agrego la room y el hallway al nivel y las correspondientes relaciones
+            _level.AddRoom(newRoom);
+            _level.AddHallway(selectedEntryway);
+            selectedEntryway.EndRoom = newRoom;
+            
+            //Calculo las nuevos pasillos disponibles de la nueva room
+            List<Hallway> newOpenHallways = newRoom.CalculateAllPosibleDoorways(newRoom.Area.width, newRoom.Area.height, 1);
+            
+            //Asigna a todos los nuevos pasillos, la nueva room como origen.
+            newOpenHallways.ForEach(hallway => hallway.StartRoom = newRoom);
+            
+            //retiro del pool, la entrada usada y agrego todos los nuevos objetos
+            _openDoorways.Remove(selectedEntryway);
+            _openDoorways.AddRange(newOpenHallways);
+            
+            
+        }
+        
+    }
+
+
+
+    }
+
+
 
