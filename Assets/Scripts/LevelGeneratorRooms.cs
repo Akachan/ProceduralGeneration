@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using System.Numerics;
+using Vector3 = UnityEngine.Vector3;
 
 public class LevelGeneratorRooms : MonoBehaviour
 {
@@ -43,8 +45,15 @@ public class LevelGeneratorRooms : MonoBehaviour
         Hallway selectedExit = SelectHallwayCandidate(new RectInt(0, 0, 5, 7), selectedEntryway);
         Debug.Log(selectedExit.StartPosition);
         Debug.Log(selectedExit.StartDirection);
-        
+        Vector2Int roomCandidatePosition = CalculateRoomPosition(selectedEntryway, 5,7,3, selectedExit.StartPosition);
+        Room secondRoom = new Room(new RectInt(roomCandidatePosition.x, roomCandidatePosition.y, 5, 7));
+        selectedEntryway.EndRoom = secondRoom;
+        selectedEntryway.EndPosition = selectedExit.StartPosition;
+        _level.AddRoom(secondRoom);
+        _level.AddHallway(selectedEntryway);
         DrawLayout(selectedEntryway, roomRect);
+        
+        
         //testing
     
         //end Testing
@@ -114,6 +123,32 @@ public class LevelGeneratorRooms : MonoBehaviour
         HallwayDirection requiredDirection = entryway.StartDirection.GetOppositeDirection();  
         List <Hallway> filteredHallwayCandidates = candidates.Where(hallwayCandidate => hallwayCandidate.StartDirection == requiredDirection).ToList();
         return filteredHallwayCandidates.Count > 0 ? filteredHallwayCandidates[_random.Next(filteredHallwayCandidates.Count)] : null;
+    }
+
+    private Vector2Int CalculateRoomPosition(Hallway entryway, int roomWidth, int roomLenght, int distance, Vector2Int endPosition)
+    {
+        Vector2Int roomPosition = entryway.StartPositionAbsolute;
+        switch (entryway.StartDirection)
+        {
+            case HallwayDirection.Left:
+                roomPosition.x -= distance + roomWidth;
+                roomPosition.y -= endPosition.y;
+                break;
+            case HallwayDirection.Top:
+                roomPosition.x -= endPosition.x;
+                roomPosition.y += distance + 1;
+                break;
+            case HallwayDirection.Right:
+                roomPosition.x += distance + 1;
+                roomPosition.y -= endPosition.y;
+                break;
+            case HallwayDirection.Bottom:
+                roomPosition.x -= endPosition.x;
+                roomPosition.y -= distance + roomLenght;
+                break;
+        }
+        return roomPosition;
+
     }
 }
 
