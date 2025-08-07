@@ -154,12 +154,12 @@ MonoBehaviour:
   width: 64
   lenght: 64
   roomWidthMin: 3
-  roomWidthMax: 7
+  roomWidthMax: 10
   roomLenghtMin: 3
   roomLenghtMax: 10
   maxRoomCount: 10
   hallwayLengthMin: 2
-  hallwayLengthMax: 6
+  hallwayLengthMax: 10
   levelLayoutDisplay: {fileID: 1146197140}
 --- !u!4 &323391922
 Transform:

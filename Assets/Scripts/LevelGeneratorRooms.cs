@@ -180,6 +180,11 @@ public class LevelGeneratorRooms : MonoBehaviour
         
         //posicionamos el rectangulo en su pos final
         roomCandidateRect.position = roomCandidatePosition;
+
+        if (!IsRoomCandidateValid(roomCandidateRect))
+        {
+            return null;
+        }
         
         //creamos la room, con ese rectangulo
         Room newRoom = new Room(roomCandidateRect);
@@ -229,9 +234,48 @@ public class LevelGeneratorRooms : MonoBehaviour
         
     }
 
-
-
+    bool IsRoomCandidateValid(RectInt roomCandidateRect)
+    {
+        //FIX: SALIDA DEL MAPA**************************
+        //hace un rectangulo levemente mas chico que el mapa
+        RectInt levelRect = new RectInt(1, 1, width -2,lenght - 2);
+        
+        //se fija si la room nueva, está contenida dentro del mapa  y si no overlapea con otras rooms (ver funcion)
+        return levelRect.Contains(roomCandidateRect) && !CheckRoomOverlap(roomCandidateRect, _level.Rooms, _level.Hallways, 1);
     }
+
+    bool CheckRoomOverlap(RectInt roomCandidateRect, Room[] rooms, Hallway[] hallways, int minRoomDistance)
+    {
+        //nueva room con margen
+        RectInt paddedRoomRect = new RectInt
+        { 
+            //agreganding margen
+            x = roomCandidateRect.x - minRoomDistance,
+            y = roomCandidateRect.y - minRoomDistance,
+            width = roomCandidateRect.width + 2 * minRoomDistance,
+            height = roomCandidateRect.height + 2 * minRoomDistance
+        };
+        
+        //revisa si la nueva room se overlapea con las rooms existentes
+        foreach (Room room in rooms)
+        {
+            if(paddedRoomRect.Overlaps(room.Area))
+            {
+                return true;
+            }
+        }
+
+        foreach (var hallway in hallways)
+        {
+            if(paddedRoomRect.Overlaps(hallway.Area))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+}
 
 
 
