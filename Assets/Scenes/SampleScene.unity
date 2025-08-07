@@ -157,6 +157,8 @@ MonoBehaviour:
   roomWidthMax: 7
   roomLenghtMin: 3
   roomLenghtMax: 10
+  hallwayLengthMin: 2
+  hallwayLengthMax: 6
   levelLayoutDisplay: {fileID: 1146197140}
 --- !u!4 &323391922
 Transform:

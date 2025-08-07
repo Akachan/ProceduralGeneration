@@ -8,14 +8,20 @@ using Vector3 = UnityEngine.Vector3;
 
 public class LevelGeneratorRooms : MonoBehaviour
 {
+    [Header("Map")]
     [SerializeField] private int width = 64;
     [SerializeField] private int lenght = 64;
     
+    [Header("Room")]
     [SerializeField] private int roomWidthMin = 3;
     [SerializeField] private int roomWidthMax = 5;
     [SerializeField] private int roomLenghtMin = 3;
     [SerializeField] private int roomLenghtMax = 5;
 
+    [Header("Hallway")]
+    [SerializeField] private int hallwayLengthMin = 2;
+    [SerializeField] private int hallwayLengthMax = 5;
+    
     [SerializeField] private GameObject levelLayoutDisplay;
     [SerializeField] private List<Hallway> _openDoorways;
     
@@ -42,14 +48,9 @@ public class LevelGeneratorRooms : MonoBehaviour
         _level.AddRoom(room);
         
         Hallway selectedEntryway = _openDoorways[_random.Next(_openDoorways.Count)];
-        Hallway selectedExit = SelectHallwayCandidate(new RectInt(0, 0, 5, 7), selectedEntryway);
-        Debug.Log(selectedExit.StartPosition);
-        Debug.Log(selectedExit.StartDirection);
-        Vector2Int roomCandidatePosition = CalculateRoomPosition(selectedEntryway, 5,7,3, selectedExit.StartPosition);
-        Room secondRoom = new Room(new RectInt(roomCandidatePosition.x, roomCandidatePosition.y, 5, 7));
-        selectedEntryway.EndRoom = secondRoom;
-        selectedEntryway.EndPosition = selectedExit.StartPosition;
+        Room secondRoom = ConstructAdjacentRoom(selectedEntryway);
         _level.AddRoom(secondRoom);
+        
         _level.AddHallway(selectedEntryway);
         DrawLayout(selectedEntryway, roomRect);
         
@@ -128,6 +129,9 @@ public class LevelGeneratorRooms : MonoBehaviour
     private Vector2Int CalculateRoomPosition(Hallway entryway, int roomWidth, int roomLenght, int distance, Vector2Int endPosition)
     {
         Vector2Int roomPosition = entryway.StartPositionAbsolute;
+        
+        //Calcula la posición de la nueva room en base al largo del pasillo, la posicion absoluta de la entrada (al pasillo)
+        //y la posición relativa de la salida (del pasillo) hacia la nueva room.
         switch (entryway.StartDirection)
         {
             case HallwayDirection.Left:
@@ -148,7 +152,44 @@ public class LevelGeneratorRooms : MonoBehaviour
                 break;
         }
         return roomPosition;
-
     }
+
+    private Room ConstructAdjacentRoom(Hallway selectedEntryway)
+    {
+        //inicializamos un rectangulo con ancho y alto random
+        RectInt roomCandidateRect = new RectInt                     
+        {
+            width = _random.Next(roomWidthMin, roomWidthMax),
+            height = _random.Next(roomLenghtMin, roomLenghtMax)
+        };
+        
+        //elegimos un pasillo random (del nuevo rectangulo) que esté del lado donde queremos
+        Hallway selectedExit = SelectHallwayCandidate(roomCandidateRect, selectedEntryway);
+        if (selectedExit == null) { return null; }
+        
+        Debug.Log(selectedExit.StartPosition);
+        Debug.Log(selectedExit.StartDirection);
+        
+        //Calculamos la posición de la nueva room, en base al pasillo
+        int distance = _random.Next(hallwayLengthMin, hallwayLengthMax);
+        Vector2Int roomCandidatePosition = CalculateRoomPosition(selectedEntryway,
+                                                                roomCandidateRect.width, 
+                                                                roomCandidateRect.height,
+                                                                distance,
+                                                                selectedExit.StartPosition);
+        
+        //posicionamos el rectangulo en su pos final
+        roomCandidateRect.position = roomCandidatePosition;
+        
+        //creamos la room, con ese rectangulo
+        Room newRoom = new Room(roomCandidateRect);
+        
+        //Al pasillo le definimos cual es su salida y a que room te lleva
+        selectedEntryway.EndRoom = newRoom;
+        selectedEntryway.EndPosition = selectedExit.StartPosition;
+        
+        return newRoom;
+    }
+    
 }
 
