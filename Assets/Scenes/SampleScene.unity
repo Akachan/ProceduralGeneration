@@ -157,7 +157,7 @@ MonoBehaviour:
   roomWidthMax: 10
   roomLenghtMin: 3
   roomLenghtMax: 10
-  maxRoomCount: 10
+  maxRoomCount: 20
   hallwayLengthMin: 2
   hallwayLengthMax: 10
   levelLayoutDisplay: {fileID: 1146197140}

@@ -3,11 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
-using System.Numerics;
+using Random = System.Random; //Es como un nickname que le damos para no tener que escribirlo completo
+                                //cuando lo necesitemos
 using Vector3 = UnityEngine.Vector3;
 
 public class LevelGeneratorRooms : MonoBehaviour
 {
+    [SerializeField] int seed = Environment.TickCount;  //da la cantidad de milisegundos desde que 
+                                                        //el sistema arrancó
+    
     [Header("Map")]
     [SerializeField] private int width = 64;
     [SerializeField] private int lenght = 64;
@@ -18,21 +22,35 @@ public class LevelGeneratorRooms : MonoBehaviour
     [SerializeField] private int roomLenghtMin = 3;
     [SerializeField] private int roomLenghtMax = 5;
     [SerializeField] private int maxRoomCount = 10;
+  
+  
 
     [Header("Hallway")]
+   
     [SerializeField] private int hallwayLengthMin = 2;
     [SerializeField] private int hallwayLengthMax = 5;
+    [SerializeField] private int doorDistanceFromEdge = 1;
+    [SerializeField] private int minRoomDistance = 1;
     
     [SerializeField] private GameObject levelLayoutDisplay;
     [SerializeField] private List<Hallway> _openDoorways;
     
-    private System.Random _random;
+    private Random _random;
     private Level _level;
+    
+    
+    [ContextMenu("Generate new Seed & new Level")]
+    public void GenerateNewSeedNewLevel()
+    {
+        GenerateNewSeed();
+        GenerateLevel();
+    }
+    
     
     [ContextMenu("Generate Level Layout")]
     public void GenerateLevel()
     {   
-        _random = new System.Random();
+        _random = new Random(seed);
         _openDoorways = new List<Hallway>();
         _level = new Level(width, lenght);
         var roomRect = GetStartRoomRect();
@@ -42,7 +60,7 @@ public class LevelGeneratorRooms : MonoBehaviour
         //Calcula las salidas de una room
         List<Hallway> hallways = room.CalculateAllPosibleDoorways(  room.Area.width,           
                                                                     room.Area.height, 
-                                                                    1);
+                                                                    doorDistanceFromEdge);
         hallways.ForEach(hallway => hallway.StartRoom = room);                      //Lambda Expression for Foreach
         hallways.ForEach(hallway => _openDoorways.Add(hallway));
         
@@ -54,13 +72,15 @@ public class LevelGeneratorRooms : MonoBehaviour
         
         DrawLayout(selectedEntryway, roomRect);
         
-        
-        //testing
-    
-        //end Testing
-        
-        //DrawLayout(roomRect);
+
     }
+
+    [ContextMenu("Generate New Seed")]
+    public void GenerateNewSeed()
+    {
+        seed = Environment.TickCount;
+    }
+
 
     private RectInt GetStartRoomRect()
     {
@@ -86,8 +106,10 @@ public class LevelGeneratorRooms : MonoBehaviour
         return new RectInt(roomX, roomY, roomWidth, roomLenght);
     }
 
-    private void DrawLayout(Hallway selectedEntry = null, RectInt roomCandidate = new RectInt())
-    {
+    private void DrawLayout(Hallway selectedEntry = null, RectInt roomCandidate = new RectInt(), bool isDebug = false)
+    {                                                                               //isDebug es para que solo se muestren
+                                                                                    //las salidas si estamos en modo debug
+                                                                                    
         var renderer = levelLayoutDisplay.GetComponent<Renderer>();                 //toma el renderer
 
         var layoutTexture = (Texture2D)renderer.sharedMaterial.mainTexture;         //toma la textura 2d
@@ -98,15 +120,15 @@ public class LevelGeneratorRooms : MonoBehaviour
         
         Array.ForEach(_level.Rooms, room => layoutTexture.DrawRectangle(room.Area, Color.white));
         Array.ForEach(_level.Hallways, hallway => layoutTexture.DrawLine(hallway.StartPositionAbsolute, hallway.EndPositionAbsolute, Color.white));
-        
-        layoutTexture.DrawRectangle(roomCandidate, Color.blue);                  //Dibuja un rectangulo cyan
 
-     
-        foreach (var hallway in _openDoorways)
+        if (isDebug)
         {
-            layoutTexture.SetPixel(hallway.StartPositionAbsolute.x, hallway.StartPositionAbsolute.y, hallway.StartDirection.GetColor());
+            layoutTexture.DrawRectangle(roomCandidate, Color.blue); //Dibuja un rectangulo cyan
+            
+            _openDoorways.ForEach((hallway => layoutTexture.SetPixel(hallway.StartPositionAbsolute.x, hallway.StartPositionAbsolute.y, hallway.StartDirection.GetColor())));
         }
-        if (selectedEntry != null)
+
+        if (isDebug && selectedEntry != null)
         {
             layoutTexture.SetPixel(selectedEntry.StartPositionAbsolute.x, selectedEntry.StartPositionAbsolute.y, Color.red);
         }
@@ -120,7 +142,7 @@ public class LevelGeneratorRooms : MonoBehaviour
     private Hallway SelectHallwayCandidate(RectInt roomCandidateRect, Hallway entryway)
     {
         Room room = new Room(roomCandidateRect);
-        List<Hallway> candidates = room.CalculateAllPosibleDoorways(room.Area.width, room.Area.height, 1);
+        List<Hallway> candidates = room.CalculateAllPosibleDoorways(room.Area.width, room.Area.height, doorDistanceFromEdge);
         HallwayDirection requiredDirection = entryway.StartDirection.GetOppositeDirection();  
         List <Hallway> filteredHallwayCandidates = candidates.Where(hallwayCandidate => hallwayCandidate.StartDirection == requiredDirection).ToList();
         return filteredHallwayCandidates.Count > 0 ? filteredHallwayCandidates[_random.Next(filteredHallwayCandidates.Count)] : null;
@@ -220,7 +242,7 @@ public class LevelGeneratorRooms : MonoBehaviour
             selectedEntryway.EndRoom = newRoom;
             
             //Calculo las nuevos pasillos disponibles de la nueva room
-            List<Hallway> newOpenHallways = newRoom.CalculateAllPosibleDoorways(newRoom.Area.width, newRoom.Area.height, 1);
+            List<Hallway> newOpenHallways = newRoom.CalculateAllPosibleDoorways(newRoom.Area.width, newRoom.Area.height, doorDistanceFromEdge);
             
             //Asigna a todos los nuevos pasillos, la nueva room como origen.
             newOpenHallways.ForEach(hallway => hallway.StartRoom = newRoom);
@@ -241,7 +263,7 @@ public class LevelGeneratorRooms : MonoBehaviour
         RectInt levelRect = new RectInt(1, 1, width -2,lenght - 2);
         
         //se fija si la room nueva, está contenida dentro del mapa  y si no overlapea con otras rooms (ver funcion)
-        return levelRect.Contains(roomCandidateRect) && !CheckRoomOverlap(roomCandidateRect, _level.Rooms, _level.Hallways, 1);
+        return levelRect.Contains(roomCandidateRect) && !CheckRoomOverlap(roomCandidateRect, _level.Rooms, _level.Hallways, minRoomDistance);
     }
 
     bool CheckRoomOverlap(RectInt roomCandidateRect, Room[] rooms, Hallway[] hallways, int minRoomDistance)
