@@ -9,6 +9,7 @@ using Vector3 = UnityEngine.Vector3;
 
 public class LevelGeneratorRooms : MonoBehaviour
 {
+    
     [SerializeField] int seed = Environment.TickCount;  //da la cantidad de milisegundos desde que 
                                                         //el sistema arrancó
 
@@ -21,7 +22,7 @@ public class LevelGeneratorRooms : MonoBehaviour
     
     private Random _random;
     private Level _level;
-    
+    private Dictionary<RoomTemplate, int> _availableRooms;
     
     [ContextMenu("Generate new Seed & new Level")]
     public void GenerateNewSeedNewLevel()
@@ -35,9 +36,12 @@ public class LevelGeneratorRooms : MonoBehaviour
     public void GenerateLevel()
     {   
         _random = new Random(seed);
+        _availableRooms = levelConfig.GetAvailableRooms();
+        
         _openDoorways = new List<Hallway>();
         _level = new Level(levelConfig.Width, levelConfig.Lenght);
-        var roomRect = GetStartRoomRect();
+        RoomTemplate startRoomTemplate = _availableRooms.Keys.ElementAt(_random.Next(0, _availableRooms.Count));
+        var roomRect = GetStartRoomRect(startRoomTemplate);
         Debug.Log(roomRect);
         Room room = new Room(roomRect);
         
@@ -66,12 +70,12 @@ public class LevelGeneratorRooms : MonoBehaviour
     }
 
 
-    private RectInt GetStartRoomRect()
+    private RectInt GetStartRoomRect(RoomTemplate roomTemplate)
     {
         //datos previos: Se considera que no se puede construir en un margen de width/4 es decir que
         //              es construible en un ancho de width/2 (el centro)
         
-        int roomWidth = _random.Next(levelConfig.RoomWidthMin, levelConfig.RoomWidthMax);       //calcula el ancho de la room
+        int roomWidth = _random.Next(roomTemplate.RoomWidthMin, roomTemplate.RoomWidthMax);       //calcula el ancho de la room
         
         int availableWidthX = levelConfig.Width / 2 - roomWidth;                    //calcula el espacio en donde
                                                                         //se puede mover ese rectangulo
@@ -82,7 +86,7 @@ public class LevelGeneratorRooms : MonoBehaviour
                                                                         //dentro del espacio disponible
         
         //Esto es lo mismo pero para la altura :) 
-        int roomLenght = _random.Next(levelConfig.RoomLenghtMin, levelConfig.RoomLenghtMax);
+        int roomLenght = _random.Next(roomTemplate.RoomLenghtMin, roomTemplate.RoomLenghtMax);
         int availableLenghtY = levelConfig.Lenght / 2 - roomLenght;
         int randomY = _random.Next(0, availableLenghtY);
         int roomY = randomY + (levelConfig.Lenght / 4);
@@ -163,10 +167,12 @@ public class LevelGeneratorRooms : MonoBehaviour
     private Room ConstructAdjacentRoom(Hallway selectedEntryway)
     {
         //inicializamos un rectangulo con ancho y alto random
+        
+        RoomTemplate roomTemplate = _availableRooms.Keys.ElementAt(_random.Next(0, _availableRooms.Count));
         RectInt roomCandidateRect = new RectInt                     
         {
-            width = _random.Next(levelConfig.RoomWidthMin, levelConfig.RoomWidthMax),
-            height = _random.Next(levelConfig.RoomLenghtMin, levelConfig.RoomLenghtMax)
+            width = _random.Next(roomTemplate.RoomWidthMin, roomTemplate.RoomWidthMax),
+            height = _random.Next(roomTemplate.RoomLenghtMin, roomTemplate.RoomLenghtMax)
         };
         
         //elegimos un pasillo random (del nuevo rectangulo) que esté del lado donde queremos

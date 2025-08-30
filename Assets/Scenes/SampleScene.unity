@@ -151,8 +151,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc7104229b244bf438c7fb2e4f1f7e87, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  seed: 348920359
-  levelConfig: {fileID: 11400000, guid: 4961ca815ae514747a8d3aa149eb8962, type: 2}
+  seed: 351339046
+  levelConfig: {fileID: 11400000, guid: 1bc92c42298ce824a9bde1562cc69700, type: 2}
   levelLayoutDisplay: {fileID: 1146197140}
 --- !u!4 &323391922
 Transform:
@@ -166,7 +166,8 @@ Transform:
   m_LocalPosition: {x: 0.006633488, y: 0.09598202, z: 0.09421885}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1146197144}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &330585543
@@ -572,12 +573,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1146197140}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.006633488, y: -0.09598202, z: -0.09421885}
   m_LocalScale: {x: 64, y: 64, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 323391922}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
@@ -586,5 +587,4 @@ SceneRoots:
   - {fileID: 330585546}
   - {fileID: 410087041}
   - {fileID: 832575519}
-  - {fileID: 1146197144}
   - {fileID: 323391922}

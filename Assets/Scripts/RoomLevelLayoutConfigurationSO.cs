@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 [CreateAssetMenu(fileName = "New LayoutConfig",
     menuName = "Custom/Procedural Generation/Room Level Layout Configuration")]
@@ -9,10 +11,9 @@ public class RoomLevelLayoutConfigurationSo : ScriptableObject
     [SerializeField] private int lenght = 64;
 
     [Header("Room")] 
-    [SerializeField] private int roomWidthMin = 3;
-    [SerializeField] private int roomWidthMax = 5;
-    [SerializeField] private int roomLenghtMin = 3;
-    [SerializeField] private int roomLenghtMax = 5;
+  
+    
+    [SerializeField] private RoomTemplate[] roomTemplates;
     [SerializeField] private int maxRoomCount = 10;
     
     [Header("Hallway")]
@@ -23,16 +24,28 @@ public class RoomLevelLayoutConfigurationSo : ScriptableObject
     
     public int Width => width;
     public int Lenght => lenght;
-    public int RoomWidthMin => roomWidthMin;
-    public int RoomWidthMax => roomWidthMax;
-    public int RoomLenghtMin => roomLenghtMin;
-    public int RoomLenghtMax => roomLenghtMax;
+
+    
+    public  RoomTemplate[] RoomTemplates => roomTemplates;
     public int MaxRoomCount => maxRoomCount;
     public int HallwayLengthMin => hallwayLengthMin;
     public int HallwayLengthMax => hallwayLengthMax;
     public int DoorDistanceFromEdge => doorDistanceFromEdge;
     public int MinRoomDistance => minRoomDistance;
 
+    public Dictionary<RoomTemplate, int> GetAvailableRooms()
+    {
+        var availableRooms = new Dictionary<RoomTemplate, int>();
+        for (int i = 0; i < roomTemplates.Length; i++)
+        {
+            availableRooms.Add(roomTemplates[i], roomTemplates[i].NumberOfRooms);
+        }
+        //Esta linea devuelve los Templates que uan le queden Rooms disponibles para tomar.
+        availableRooms = availableRooms.Where(kvp => kvp.Value > 0).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+        
+        
+        return availableRooms;
+    }
 
 
 }
